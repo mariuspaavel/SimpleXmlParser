@@ -1,29 +1,28 @@
 package SimpleXmlParser;
-import java.util.ArrayList;
 
-public class Document extends Element {
+public class Document extends Block {
 	
-	ArrayList<Param> params;
-	ArrayList<Element> children;
-	
+	public Document(Document doc) {
+		super(doc);
+		
+	}
 	public Document() {
-		params = new ArrayList<Param>();
-		children = new ArrayList<Element>();
+		super();
+	}
+	public Document(String source) {
+		Parser.parse(source, this);
+		hasBody = true;
 	}
 	
-	public ArrayList<Param> getParams(){
-		return params;
-	}
-	public ArrayList<Element> getChildren(){
-		return children;
-	}
 	
 	@Override
 	void print(StringBuilder op) {
 		op.append("<?xml");
-		for(Param p : params) {
+		for(Identifier name : params.keySet()) {
 			op.append(' ');
-			p.print(op);
+			name.print(op);
+			op.append("=");
+			params.get(name).print(op);
 		}
 		op.append("?>");
 		for(Element e: children)e.print(op);
@@ -32,9 +31,34 @@ public class Document extends Element {
 	@Override
 	public int getstrlen() {
 		int len = 4;
-		for(Param p : params)len+=p.getstrlen()+1;
+		for(Identifier i : params.keySet())len+=i.getstrlen()+params.get(i).getstrlen()+1;
 		for(Element e : children)len+=e.getstrlen();
 		return len;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if(! (o instanceof Document))return false;
+		if(o == this)return true;
+		Document d = (Document) o;
+		if(!params.equals(d.params))return false;
+		if(!children.equals(d.children))return false;
+		return true;
+	}
+	@Override
+	public int hashCode() {
+		int code = identif.hashCode();
+		for(Identifier i : params.keySet()) {
+			code ^= i.hashCode();
+			code ^= params.get(i).hashCode();
+		}
+		code ^= 0x01;
+		for(Element e : children)code ^= e.hashCode();
+		return code;
+	}
+	@Override
+	public Object clone() {
+		return new Document(this);
 	}
 
 }
