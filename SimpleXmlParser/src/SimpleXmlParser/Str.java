@@ -37,7 +37,7 @@ public class Str extends Element implements Cloneable {
 		}
 	}
 	
-	void set(String s) {
+	public void set(String s) {
 		indep = false;
 		source = s;
 		start = 0;

@@ -5,7 +5,6 @@ class Parser {
 	private Parser() {}
 	
 	private static Identifier readIdentifier(Index idx) {
-		int start = idx.pos;
 		idx.findidentifend();
 		Str name = new Str(idx);
 		idx.skipWS();
@@ -134,20 +133,50 @@ class Parser {
 		return txt;
 	}
 	
+
+	
 	private static Block readBlock(Index idx) {
 		Block b = readBlockHead(idx);
 		
 		if(!b.hasBody)return b;
 		
 		while(true){
-			if(idx.get() != '<')b.children.add((readStr(idx)));
+			if(idx.get() != '<')b.add((readStr(idx)));
+			else if(idx.cmpIgnWs("<!--"))b.add(readComment(idx));
 			else if(readBlockTail(idx, b))return b;
-			else b.children.add((readBlock(idx)));
+			else b.add((readBlock(idx)));
 		}
 	}
 	
 	private static void checkch(Index idx, char c, String errmsg) {
 		if(idx.get() != c)throw new RuntimeException(errmsg);
+	}
+	
+	private static Comment readComment(Index idx) {
+		
+		if(!idx.cmpIgnWs("<!--"))throw new RuntimeException("Invalid comment start");
+	
+		idx.findChar('!');
+		idx.jump(1);
+		idx.findChar('-');
+		idx.jump(1);
+		idx.findChar('-');
+		idx.jump(1);
+		
+		Comment comment = null;
+		int stringstart = idx.pos;
+		
+		do {
+			idx.findChar('-');
+		}while(!idx.cmpIgnWs("-->"));
+		
+		idx.prev = stringstart;
+		
+		comment = new Comment(idx);
+		
+		idx.findChar('>');
+		idx.jump(1);
+		return comment;
 	}
 
 }
@@ -160,6 +189,13 @@ class Index{
 		this.source = source;
 		this.pos = this.prev = pos;
 		len = source.length();
+	}
+	@Override
+	public Object clone() {
+		Index clone = new Index(source, pos);
+		clone.prev = prev;
+		clone.len = len;
+		return clone;
 	}
 
 	void jump(int amount) {
@@ -190,6 +226,22 @@ class Index{
 	}
 	char get() {
 		return source.charAt(pos); 
+	}
+	char get(int index) {
+		return source.charAt(index);
+	}
+	
+	boolean cmpIgnWs(String sequence) {
+		
+		Index copyindex = (Index)clone();
+		for(int i = 0; i < sequence.length(); i++) {
+			char c = sequence.charAt(i);
+			if(!ws(c)){
+				copyindex.skipWS();
+				if(copyindex.get() != c)return false;
+			}
+		}
+		return true;
 	}
 	
 	

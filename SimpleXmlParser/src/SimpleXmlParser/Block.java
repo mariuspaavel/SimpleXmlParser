@@ -49,11 +49,6 @@ public class Block extends Element implements List<Element> {
 	public String getName() {
 		return identif.name.getContent().toString();
 	}
-
-	public ArrayList<Element> getChildren(){
-		return children;
-	}
-
 	
 	public void setParam(String name, String value) {
 		params.put(new Identifier(name), new Str(value));
