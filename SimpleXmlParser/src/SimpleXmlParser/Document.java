@@ -6,6 +6,9 @@ public class Document extends Block {
 		super(doc);
 		
 	}
+	public Document() {
+		this("1.0", "UTF-8");
+	}
 	public Document(String version, String encoding) {
 		super();
 		setParam("version", version);
@@ -24,7 +27,9 @@ public class Document extends Block {
 			op.append(' ');
 			name.print(op);
 			op.append("=");
+			op.append('\"');
 			params.get(name).print(op);
+			op.append('\"');
 		}
 		op.append("?>");
 		for(Element e: children)e.print(op);
@@ -33,7 +38,7 @@ public class Document extends Block {
 	@Override
 	public int getstrlen() {
 		int len = 4;
-		for(Identifier i : params.keySet())len+=i.getstrlen()+params.get(i).getstrlen()+1;
+		for(Identifier i : params.keySet())len+=i.getstrlen()+params.get(i).getstrlen()+3;
 		for(Element e : children)len+=e.getstrlen();
 		return len;
 	}
