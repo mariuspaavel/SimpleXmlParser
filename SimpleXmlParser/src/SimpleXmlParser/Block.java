@@ -84,6 +84,13 @@ public class Block extends Element implements List<Element> {
 		children.add(e);
 		return true;
 	}
+	public Block get(String name) {
+		for(Element e : this) {
+			if(e instanceof Block && ((Block)e).getName().equals(name))return (Block) e;
+		}
+		return null;
+	}
+	
 	@Override
 	public Element get(int index) {
 		return children.get(index);
