@@ -124,8 +124,10 @@ public class Block extends Element implements List<Element> {
 		for(Identifier name : params.keySet()) {
 			op.append(' ');
 			name.print(op);
-			op.append("=");
+			op.append('=');
+			op.append('\"');
 			params.get(name).print(op);
+			op.append('\"');
 		}
 		if(children.size() == 0) {
 			op.append("/>");
@@ -142,7 +144,7 @@ public class Block extends Element implements List<Element> {
 	public int getstrlen() {
 		int len = identif.getstrlen();
 		len+=2;
-		for(Identifier i : params.keySet())len+=i.getstrlen()+params.get(i).getstrlen()+1;
+		for(Identifier i : params.keySet())len+=i.getstrlen()+params.get(i).getstrlen()+3;
 		if(children.size() == 0) {
 			len+=1;
 			return len;

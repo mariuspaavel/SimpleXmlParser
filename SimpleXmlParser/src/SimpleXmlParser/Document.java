@@ -6,8 +6,10 @@ public class Document extends Block {
 		super(doc);
 		
 	}
-	public Document() {
+	public Document(String version, String encoding) {
 		super();
+		setParam("version", version);
+		setParam("encoding", encoding);
 	}
 	public Document(String source) {
 		Parser.parse(source, this);

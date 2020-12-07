@@ -59,6 +59,7 @@ public class Str extends Element implements Cloneable {
 		else fullrange = false;
 	}
 	public Str(String content) {
+		if(content == null)this.content = new StringBuilder("null");
 		this.content = new StringBuilder(content);
 		indep = true;
 	}
