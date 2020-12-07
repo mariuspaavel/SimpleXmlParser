@@ -196,6 +196,9 @@ public class Block extends Element implements List<Element> {
 	
 	@Override
 	public Iterator<Element> iterator() {
+		return new ElementIterator();
+	}
+	public Iterator<Block> blockIterator(){
 		return new BlockIterator();
 	}
 
@@ -306,7 +309,7 @@ public class Block extends Element implements List<Element> {
 	}
 	
 	
-	public class BlockIterator implements Iterator<Element> {
+	public class ElementIterator implements Iterator<Element> {
 		int index = -1;
 		
 		@Override
@@ -319,6 +322,23 @@ public class Block extends Element implements List<Element> {
 			return get(++index);
 		}
 		
+	}
+	public class BlockIterator implements Iterator<Block>{
+		int index = -1;
+		@Override
+		public boolean hasNext() {
+			for(int i = index+1; i < size(); i++) {
+				if(get(i) instanceof Block)return true;
+			}
+			return false;
+		}
+		@Override
+		public Block next() {
+			while(++index < size()) {
+				if(get(index) instanceof Block)return (Block)get(index);
+			}
+			return null;
+		}
 	}
 
 }
