@@ -59,6 +59,12 @@ public class Block extends Element implements List<Element> {
 	public void removeParam(String name) {
 		params.remove(new Identifier(name));
 	}
+	public String getParam(String name) {
+		return params.get(new Identifier(name)).toString();
+	}
+	public String getParam(String domain, String name) {
+		return params.get(new Identifier(name, domain)).toString();
+	}
 	public void removeParam(String domain, String name) {
 		params.remove(new Identifier(name, domain));
 	}
