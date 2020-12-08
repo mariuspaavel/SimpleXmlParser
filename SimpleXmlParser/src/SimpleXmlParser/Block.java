@@ -50,12 +50,27 @@ public class Block extends Element implements List<Element> {
 		return identif.name.getContent().toString();
 	}
 	
+	
 	public void setParam(String name, String value) {
 		params.put(new Identifier(name), new Str(value));
 	}
 	public void setParam(String domain, String name, String value) {
 		params.put(new Identifier(name, domain), new Str(value));
 	}
+	public void setParam(String name, Object value) {
+		params.put(new Identifier(name), new Str(value.toString()));
+	}
+	public void setParam(String domain, String name, Object value) {
+		params.put(new Identifier(name, domain), new Str(value.toString()));
+	}
+	public void setParam(String name, long value) {
+		params.put(new Identifier(name), new Str(Long.toString(value)));
+	}
+	public void setParam(String domain, String name, long value) {
+		params.put(new Identifier(name, domain), new Str(Long.toString(value)));
+	}
+	
+	
 	public void removeParam(String name) {
 		params.remove(new Identifier(name));
 	}
@@ -104,6 +119,11 @@ public class Block extends Element implements List<Element> {
 	public Element get(int index) {
 		return children.get(index);
 	}
+	
+	public Element getFirstWithName(String name) {
+		return findBlock(b -> b.getName().equals(name));
+	}
+	
 	public Block getChildBlock(int index) {
 		Element e = children.get(index);
 		if(e instanceof Block) {
