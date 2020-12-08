@@ -87,18 +87,20 @@ public class Block extends Element implements List<Element> {
 	public void removeParam(String domain, String name) {
 		params.remove(new Identifier(name, domain));
 	}
-	public boolean addText(String text) {
+	public Str addText(String text) {
 		Str str = new Str(text);
 		children.add(str);
-		return true;
+		return str;
 	}
-	public boolean addBlock(String name) {
-		children.add(new Block(name));
-		return true;
+	public Block addBlock(String name) {
+		Block b = new Block(name);
+		add(b);
+		return b;
 	}
-	public boolean addBlock(String domain, String name) {
-		children.add(new Block(domain, name));
-		return true;
+	public Block addBlock(String domain, String name) {
+		Block b = new Block(domain, name);
+		add(b);
+		return b;
 	}
 	@Override
 	public boolean add(Element e) {
