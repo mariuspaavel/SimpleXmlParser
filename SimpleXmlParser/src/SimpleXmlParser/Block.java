@@ -120,7 +120,7 @@ public class Block extends Element implements List<Element> {
 		return children.get(index);
 	}
 	
-	public Element getFirstWithName(String name) {
+	public Block getFirstWithName(String name) {
 		return findBlock(b -> b.getName().equals(name));
 	}
 	
