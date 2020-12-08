@@ -60,36 +60,45 @@ public class Block extends Element implements List<Element> {
 		params.remove(new Identifier(name));
 	}
 	public String getParam(String name) {
-		return params.get(new Identifier(name)).toString();
+		Str param = params.get(new Identifier(name));
+		if(param == null)return null;
+		return param.toString();
 	}
 	public String getParam(String domain, String name) {
-		return params.get(new Identifier(name, domain)).toString();
+		Str param = params.get(new Identifier(name, domain));
+		if(param == null)return null;
+		return param.toString();
 	}
 	public void removeParam(String domain, String name) {
 		params.remove(new Identifier(name, domain));
 	}
-	public void addText(String text) {
-		children.add(new Str(text));
+	public boolean addText(String text) {
+		Str str = new Str(text);
+		children.add(str);
+		return true;
 	}
-	public Block addBlock(String name) {
+	public boolean addBlock(String name) {
 		children.add(new Block(name));
-		return (Block)children.get(children.size()-1);
+		return true;
 	}
-	public Block addBlock(String domain, String name) {
+	public boolean addBlock(String domain, String name) {
 		children.add(new Block(domain, name));
-		return (Block)children.get(children.size()-1);
+		return true;
 	}
 	@Override
 	public boolean add(Element e) {
 		children.add(e);
 		return true;
 	}
-	public Block get(String name) {
+	public ArrayList<Block> getSubset(String name) {
+		ArrayList<Block> subset = new ArrayList<Block>();
+	
 		for(Element e : this) {
-			if(e instanceof Block && ((Block)e).getName().equals(name))return (Block) e;
+			if(e instanceof Block && ((Block)e).getName().equals(name))subset.add((Block) e);
 		}
-		return null;
+		return subset;
 	}
+	
 	
 	@Override
 	public Element get(int index) {
@@ -340,6 +349,88 @@ public class Block extends Element implements List<Element> {
 			return null;
 		}
 	}
-
+	public class StrIterator implements Iterator<Str>{
+		int index = -1;
+		@Override
+		public boolean hasNext() {
+			for(int i = index+1; i < size(); i++) {
+				if(get(i) instanceof Str)return true;
+			}
+			return false;
+		}
+		@Override
+		public Str next() {
+			while(++index < size()) {
+				if(get(index) instanceof Str)return (Str)get(index);
+			}
+			return null;
+		}
+	}
+	public class CommentIterator implements Iterator<Comment>{
+		int index = -1;
+		@Override
+		public boolean hasNext() {
+			for(int i = index+1; i < size(); i++) {
+				if(get(i) instanceof Comment)return true;
+			}
+			return false;
+		}
+		@Override
+		public Comment next() {
+			while(++index < size()) {
+				if(get(index) instanceof Comment)return (Comment)get(index);
+			}
+			return null;
+		}
+	}
+	
+	public class FilteredIterator implements Iterator<Element>{
+		int index = -1;
+		Predicate<? super Element> condition;
+		
+		public FilteredIterator(Predicate<? super Element> condition) {
+			this.condition = condition;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			for(int i = index+1; i < size(); i++) {
+				if(condition.test(get(i)))return true;
+			}
+			return false;
+		}
+		@Override
+		public Element next() {
+			while(++index < size()) {
+				if(condition.test(get(index)))return (Element)get(index);
+			}
+			return null;
+		}
+	}
+	public class FilteredBlockIterator implements Iterator<Block>{
+		int index = -1;
+		Predicate<? super Block> condition;
+		
+		public FilteredBlockIterator(Predicate<? super Block> condition) {
+			this.condition = condition;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			for(int i = index+1; i < size(); i++) {
+				Element e = get(i);
+				if(e instanceof Block && condition.test((Block)get(i)))return true;
+			}
+			return false;
+		}
+		@Override
+		public Block next() {
+			while(++index < size()) {
+				Element e = get(index);
+				if(e instanceof Block && condition.test((Block)e))return (Block)get(index);
+			}
+			return null;
+		}
+	}
 }
 

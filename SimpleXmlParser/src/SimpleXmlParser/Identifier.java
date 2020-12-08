@@ -17,14 +17,17 @@ class Identifier extends Element{
 	}
 	Identifier(Str name, Str domain){
 		this.name = name;
-		this.domain = domain;
-		hasDomain = true;
+		
+		if(domain != null) {
+			this.domain = domain;
+			hasDomain = true;
+		}
 	}
 	Identifier(String name){
 		this(new Str(name));
 	}
 	Identifier(String name, String domain){
-		this(new Str(name), new Str(domain));
+		this(new Str(name), domain == null ? null : new Str(domain));
 	}
 	void addDom(String domain) {
 		this.domain = new Str(domain);
@@ -54,17 +57,14 @@ class Identifier extends Element{
 		if(o.getClass() != this.getClass()) return false;
 		Identifier other = (Identifier) o;
 		//System.out.println(other.hasDomain + " " + hasDomain);
-		if(hasDomain != other.hasDomain) return false;
-		if(hasDomain) {
-			if(!domain.equals(other.domain))return false;
-		}
-		if(!name.equals(other.name))return false;
-		return true;
+		
+		if(hasDomain && other.hasDomain && !domain.equals(other.domain)) return false; 
+		return name.equals(other.name);
+		
 	}
 	@Override
 	public int hashCode() {
 		int code = name.hashCode();
-		if(hasDomain) code ^= domain.hashCode();
 		return code;
 	}
 	@Override
