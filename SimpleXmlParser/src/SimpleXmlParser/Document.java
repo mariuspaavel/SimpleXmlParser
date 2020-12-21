@@ -14,9 +14,13 @@ public class Document extends Block {
 		setParam("version", version);
 		setParam("encoding", encoding);
 	}
-	public Document(String source) {
-		Parser.parse(source, this);
-		hasBody = true;
+	public Document(String source) throws XmlParsingException {
+		try {
+			Parser.parse(source, this);
+			hasBody = true;
+		}catch(IndexOutOfBoundsException e) {
+			throw new XmlParsingException("Illegal document");
+		}
 	}
 	
 	

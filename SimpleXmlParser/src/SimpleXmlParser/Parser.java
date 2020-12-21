@@ -19,14 +19,14 @@ class Parser {
 		else return new Identifier(name);
 	}
 	
-	private static Param readParam(Index idx) {
+	private static Param readParam(Index idx) throws IllegalParamException {
 		//System.out.println("Param start: " + idx.pos);
 		Identifier identif = readIdentifier(idx);
 		idx.skipWS();
-		if(idx.get() != '=')throw new RuntimeException("invalid param");
+		if(idx.get() != '=')throw new IllegalParamException("Parameter identifier must be followed by \'=\'");
 		idx.jump(1);
 		idx.skipWS();
-		if(idx.get() != '\"')throw new RuntimeException("invalid param");
+		if(idx.get() != '\"')throw new IllegalParamException("Parameter value must be wrapped in double quotes");
 		idx.jump(1);
 		idx.findChar('\"');
 		Str value = new Str(idx);
@@ -36,10 +36,12 @@ class Parser {
 		return p;
 	}
 	
-	private static void readXmlHead(Index idx, Document d) {
+	private static void readXmlHead(Index idx, Document d) throws XmlParsingException {
 		idx.skipWS();
+		if(idx.get() != '<')throw new IllegalXmlHeadException("xml head must start with '<'");
 		idx.jump(1);
 		idx.skipWS();
+		if(idx.get() != '?')throw new IllegalXmlHeadException("xml head must have '?'");
 		idx.findWS();
 		idx.skipWS();
 		
@@ -49,14 +51,16 @@ class Parser {
 			d.params.put(p.identif, p.value);
 			idx.skipWS();
 		}
-		checkch(idx, '?', "invalid xml head");
+		if(idx.get() != '?')throw new IllegalXmlHeadException("xml head must have '?'");
+		
 		idx.jump(1);
 		idx.skipWS();
-		checkch(idx, '>', "invalid xml head");
+		if(idx.get() != '>')throw new IllegalXmlHeadException("xml head must end with ?");
+		
 		idx.jump(1);
 	}
 	
-	private static void readXmlBody(Index idx, Document d) {
+	private static void readXmlBody(Index idx, Document d) throws XmlParsingException {
 		while(true){
 			if(idx.pos == idx.source.length())return;
 			else if(idx.get() != '<')d.children.add((readStr(idx)));
@@ -64,7 +68,7 @@ class Parser {
 		}
 	}
 	
-	static Document parse(String source, Document d) {
+	static Document parse(String source, Document d) throws XmlParsingException {
 		Index idx = new Index(source, 0);
 		readXmlHead(idx, d);
 		readXmlBody(idx, d);
@@ -72,9 +76,9 @@ class Parser {
 		return d;
 	}
 	
-	private static Block readBlockHead(Index idx) {
-		checkch(idx, '<', "invalid block start position");
-		//System.out.println("Block head start: " + idx.pos);
+	private static Block readBlockHead(Index idx) throws IllegalBlockHeadException {
+		idx.skipWS();
+		if(idx.get() != '<')throw new IllegalBlockHeadException("Block head must start with '<'", "");
 		idx.jump(1);
 		idx.skipWS();
 		Identifier identif = readIdentifier(idx);
@@ -84,24 +88,21 @@ class Parser {
 			if(idx.get() == '/') {
 				idx.jump(1);
 				idx.skipWS();
-				checkch(idx, '>', "invalid block head no '>' after '/'");
+				if(idx.get() != '\"')throw new IllegalBlockHeadException("Block terminator '/' must be followed by '>'", b.getName());
 				idx.jump(1);
-				//System.out.println("Block head end without body" + idx.pos);
 				return b;
 			}
 			if(idx.get() == '>') {
 				idx.jump(1);
 				b.hasBody = true;
-				//System.out.println("Block head end with body: " + idx.pos);
 				return b;
 			}
 			Param p = readParam(idx);
 			b.params.put(p.identif, p.value);
 		}
 	}
-	private static boolean readBlockTail(Index idx, Block b) {
+	private static boolean readBlockTail(Index idx, Block b) throws IllegalBlockTailException {
 		Index idxcpy = new Index(idx.source, idx.pos);
-		checkch(idxcpy, '<', "invalid block tail start");
 		
 		idxcpy.jump(1);
 		idxcpy.skipWS();
@@ -114,10 +115,11 @@ class Parser {
 		//System.out.println(identif);
 		//System.out.println(b.identif);
 		
-		if(!identif.equals(b.identif))throw new RuntimeException("Unmatching block tail");
+		if(!identif.equals(b.identif))throw new IllegalBlockTailException("Block tail doesn't match head", b.getName());
 		
 		idxcpy.skipWS();
-		checkch(idxcpy, '>', "invalid block tail");
+		
+		if(idxcpy.get() != '>')throw new IllegalBlockTailException("Block tail must end with '>'", b.getName());
 		idxcpy.jump(1);
 		idx.pos = idxcpy.pos;
 		idx.prev = idxcpy.prev;
@@ -135,7 +137,7 @@ class Parser {
 	
 
 	
-	private static Block readBlock(Index idx) {
+	private static Block readBlock(Index idx) throws XmlParsingException {
 		Block b = readBlockHead(idx);
 		
 		if(!b.hasBody)return b;
@@ -148,13 +150,10 @@ class Parser {
 		}
 	}
 	
-	private static void checkch(Index idx, char c, String errmsg) {
-		if(idx.get() != c)throw new RuntimeException(errmsg);
-	}
 	
-	private static Comment readComment(Index idx) {
+	private static Comment readComment(Index idx) throws IllegalCommentException {
 		
-		if(!idx.cmpIgnWs("<!--"))throw new RuntimeException("Invalid comment start");
+		if(!idx.cmpIgnWs("<!--"))throw new IllegalCommentException("Illegal comment start");
 	
 		idx.findChar('!');
 		idx.jump(1);

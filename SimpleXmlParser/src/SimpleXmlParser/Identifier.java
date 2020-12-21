@@ -38,6 +38,7 @@ class Identifier extends Element{
 		hasDomain = false;
 	}
 	
+	
 	@Override
 	void print(StringBuilder op) {
 		if(hasDomain) {

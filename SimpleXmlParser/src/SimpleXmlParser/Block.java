@@ -26,6 +26,7 @@ public class Block extends Element implements List<Element> {
 		
 	}
 	
+	
 	public Block(String name, String domain) {
 		this(new Identifier(name, domain));
 	}
